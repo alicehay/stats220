@@ -1,0 +1,97 @@
+---
+title: My dynamic report
+output: html_fragment
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE, message=FALSE, warning=FALSE, error=FALSE)
+
+```
+
+```{css}
+p {
+  font-size: 15px; 
+  font-family: Georgia, serif;
+}
+body {
+  background-color: #ffe6f0;
+}
+h2 {
+  color: #cc3366;
+  font-family: Georgia, serif;
+}
+h3 {
+  color: #cc3366;
+  font-family: Georgia, serif;
+}
+```
+
+## Trends in Auckland City Bus Commutes: Delays, Passenger Counts & Experience Ratings!
+
+```{r}
+library(tidyverse)
+
+logged_data = read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vTBY2IbpkoUxwuQU9PQPZ8ZFhijSt9TGZR_C_GrinzW3ktfSkQ62BKl4wrakwISwegdRjwZ7TsmvXMx/pub?gid=2092472461&single=true&output=csv")
+
+# rename columns 2:5, keeping column 1 the same
+latest_data <- logged_data %>%
+  rename(bus_arrival = 2,
+         bus_arrival_difference = 3,
+         number_of_passengers = 4,
+         experience = 5)
+
+# summary of values
+min_experience = min(latest_data$experience)
+max_experience = max(latest_data$experience)
+# get frequency of experiences equal to min or max
+min_frequency = sum(latest_data$experience == min_experience)
+max_frequency = sum(latest_data$experience == max_experience)
+# max valuing using min() function as negative numbers mean the bus is late 
+max_wait_time = min(latest_data$bus_arrival_difference)
+# the earliest a bus arrived by minutes
+max_early_time = max(latest_data$bus_arrival_difference)
+
+```
+
+The maximum wait time for a bus was `r max_wait_time` minutes (the negative sign shows it was delayed), while the earliest a bus arrived was `r max_early_time` minutes.
+
+The minimum experience rating recorded was `r min_experience` stars with a frequency of `r min_frequency` and the maximum recorded was `r max_experience` stars with a frequency of `r max_frequency`.
+
+### Bar Charts
+
+```{r}
+
+# bar graph of frequency of experience ratings
+
+experience_plot <- ggplot(data = latest_data) +
+  geom_bar(aes(x = experience),
+           fill = "#C3B1E1") +
+  labs(title = "Experience of Bus Rides",
+       subtitle = "1 = Poor, 5 = Amazing",
+       caption = "Source: Google Forms",
+       x = "Experience Rating",
+       y = "Frequency")
+
+paste("This Bar chart here shows the frequency of different experience ratings of a bus ride")
+
+experience_plot
+
+# bar graph of frequency of number of passengers
+
+passenger_plot <- ggplot(data = latest_data) +
+  geom_bar(aes(x = number_of_passengers),
+           fill = "#FFB7C5") +
+  labs(title = "Frequency of Bus Passengers",
+       caption = "Source: Google Forms",
+       x = "Number of Passengers in The Bus",
+       y = "Frequency")
+
+paste("Meanwhile this Bar chart here shows the frequency of number of passengers in the bus at the time of submission")
+
+passenger_plot
+
+```
+
+
+
+
